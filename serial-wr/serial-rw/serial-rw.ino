@@ -10,7 +10,7 @@
 
 // LED status
 int led_status = HIGH;
-int incomingByte = 0;
+byte incomingByte = 0;
 
 // the setup routine runs once when you press reset:
 void setup() {
