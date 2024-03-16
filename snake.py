@@ -4,18 +4,29 @@
 #
 # you need to install a few python3 packages
 #   pip3 install pyserial
+# March 2024
+# Modfied by:
+# Prathiba 
+# Cheryl
+# Salvador Cartagena
+# TODO:
+# Make apple turn gold when accelerometer detects a shake
+# Increase points scored x2 when golden apple eaten
+# Make buzzer buzz when any apple eaten
+# Control snake with joystick
+# Control snake with gyro (does not have to be the same time as joystick but it's ok if both act as control at the same time)
 
 import turtle
 import time
 import random
 # TODO uncomment the following line to use pyserial package
-#import serial
+import serial
 
 # Note the serial port dev file name
 # need to change based on the particular host machine
 # TODO uncomment the following two lines to initialize serial port
-#serialDevFile = '/dev/cu.usbmodem14201'
-#ser=serial.Serial(serialDevFile, 9600, timeout=0)
+serialDevFile = '/dev/tty.usbmodem142301'
+ser=serial.Serial(serialDevFile, 9600, timeout=0)
 
 delay = 0.1
 
@@ -23,6 +34,8 @@ delay = 0.1
 score = 0
 high_score = 0
 ppa = 10
+# Added for graduate class
+goldScore = 0
 
 # Set up the screen
 wn = turtle.Screen()
@@ -115,7 +128,18 @@ while True:
     #     head.direction = "down"
     # elif ......
     #
-
+    line = ser.readline()
+    if (line == b'W\r\n' or line == b'w\r\n'):
+        go_up()
+    elif (line == b'S\r\n' or line == b's\r\n'):
+        go_down()
+    elif (line == b'A\r\n' or line == b'a\r\n'):
+        go_left()
+    elif (line == b'D\r\n' or line == b'd\r\n'):
+        go_right()
+    elif (line == b'Q\r\n' or line == b'q\r\n'):
+        food.color("gold")
+        goldScore = 10
     # Check for a collision with the border
     if head.xcor()>290 or head.xcor()<-290 or head.ycor()>290 or head.ycor()<-290:
         time.sleep(1)
@@ -131,6 +155,8 @@ while True:
 
         # Reset the score
         score = 0
+        goldScore = 0
+        food.color("red")
 
         # Reset the delay
         delay = 0.1
@@ -146,10 +172,13 @@ while True:
         # you need to send a flag to Arduino indicating an apple is eaten
         # so that the Arduino will beep the buzzer
         # Hint: refer to the example at Serial-RW/pyserial-test.py
+        # 'B' for Buzz
+        ser.write(b'B') 
 
         # Move the food to a random spot
         x = random.randint(-290, 290)
         y = random.randint(-290, 290)
+        food.color("red")
         food.goto(x,y)
 
         # Add a segment
@@ -160,11 +189,18 @@ while True:
         new_segment.penup()
         segments.append(new_segment)
 
+        # 'U' for Unbuzz
+        ser.write(b'U')
+
         # Shorten the delay
         delay -= 0.001
 
         # Increase the score
         score += 10
+        score = score + goldScore
+        goldScore = 0
+        # 'U' for Unbuzz
+        ser.write(b'U') 
 
         if score > high_score:
             high_score = score
@@ -202,6 +238,7 @@ while True:
 
             # Reset the score
             score = 0
+            goldScore = 0
 
             # Reset the delay
             delay = 0.1
