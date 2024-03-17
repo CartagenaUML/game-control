@@ -8,7 +8,6 @@
 import turtle
 import time
 import random
-
 # TODO uncomment the following line to use pyserial package
 import serial
 
@@ -18,15 +17,9 @@ import serial
 #serialDevFile = '/dev/cu.usbmodem14201'
 #SerialObj=serial.Serial('COM3', 9600, timeout=0)
 arduinoData=serial.Serial('com3',9600,timeout=1);
-arduinoData.flush()
+
 delay = 0.1
 
-   
-        
-   
-    
-    
-    
 # Score
 score = 0
 high_score = 0
@@ -71,30 +64,20 @@ pen.write("Score: 0  High Score: 0  P/A: 10", align="center", font=("Courier", 2
 # Functions
 def go_up():
     if head.direction != "down":
-       head.direction = "up"
-       head.setheading(90)
-       head.forward(50)
-       #wn.speed("fastest")
-       wn.update()
+        head.direction = "up"
 
 def go_down():
     if head.direction != "up":
         head.direction = "down"
-        head.setheading(270)
-        head.forward(50)
-        wn.update()
+
 def go_left():
     if head.direction != "right":
         head.direction = "left"
-        head.setheading(180)
-        head.forward(50)
-        wn.update()
+
 def go_right():
     if head.direction != "left":
         head.direction = "right"
-        head.setheading(0)
-        head.forward(50)
-        wn.update()
+
 def move():
     if head.direction == "up":
         y = head.ycor()
@@ -113,47 +96,15 @@ def move():
         head.setx(x + 20)
 
 # Keyboard bindings
-
-#wn.onkey(go_up, "w")
-#wn.onkey(go_down, "s")
-#wn.onkey(go_left, "a")
-#wn.onkey(go_right, "d")
+wn.listen()
+wn.onkey(go_up, "w")
+wn.onkey(go_down, "s")
+wn.onkey(go_left, "a")
+wn.onkey(go_right, "d")
 
 # Main game loop
-#turtle.mainloop()
 while True:
-    while arduinoData.inWaiting()==0:
-          pass
-    arduinoData.reset_input_buffer() 
-    d= arduinoData.readline()
     wn.update()
-    arduinoData.flush()
-    arduinoData.flushInput()
-    arduinoData.flushOutput()
-    d=str(d,'utf-8')
-    d=d.strip('\r\n')
-    print(d)
-    if d=="s":
-       head.direction=="stop"
-       wn.update()
-    elif d=="u":
-        go_up()
-    elif d=="l":
-        go_left()
-    elif d=="r":
-        go_right()
-    elif d=="d":
-        go_down()
-    
- 
-
-    
-    
-        
-   
-        
-  
-    
 
     # TODO: notes by Prof. Luo
     # you need to add your code to read control information from serial port
@@ -165,7 +116,26 @@ while True:
     #     head.direction = "down"
     # elif ......
     #
+    arduinoData.reset_input_buffer()
+    while arduinoData.inWaiting()==0:
+        pass
+        
+    control_information = arduinoData.read()
 
+    control_information=str(control_information,'utf-8')
+    #print(control_information)
+    
+    if control_information == "u":
+        head.direction = "up"
+    elif control_information == "d":
+        head.direction = "down"
+    elif control_information == "r":
+        head.direction = "right"
+    elif control_information == "l":
+        head.direction = "left"
+
+    #print(head.direction)
+    
     # Check for a collision with the border
     if head.xcor()>290 or head.xcor()<-290 or head.ycor()>290 or head.ycor()<-290:
         time.sleep(1)
@@ -209,7 +179,6 @@ while True:
         new_segment.color("grey")
         new_segment.penup()
         segments.append(new_segment)
-        #arduinoData.write(b'E')#to write data to arduino
 
         # Shorten the delay
         delay -= 0.001
