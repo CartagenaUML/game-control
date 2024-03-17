@@ -73,6 +73,17 @@ void loop() {
   accX = (Wire.read() << 8| Wire.read()) / 16384.0;
   accY = (Wire.read() << 8| Wire.read()) / 16384.0;
   accZ = (Wire.read() << 8| Wire.read()) / 16384.0;
+
+  /* absolute value of acceleration
+  if (accX < 0) {
+    accX = accX * -1;
+  }
+  if (accY < 0) {
+    accY = accY * -1;
+  }
+  if (accZ < 0) {
+    accZ = accZ * -1;
+  }*/
   totalAcc = accX + accY + accZ;
   if (totalAcc >= 3) {
     Serial.println("Q");
