@@ -31,16 +31,16 @@ yVal=map(analogRead(potY)-8,0,1023,-5,+5);
 //delay(40);
 //zVal=digitalRead(potZ);
 if (xVal==0 & yVal== 0)
-   Serial.println('s');
+   Serial.print('s');
 else if (xVal>= 0 & yVal== -5)
-   Serial.println('u');
+   Serial.print('u');
 else if (xVal==0 & yVal>=4)
-    Serial.println('d');
+    Serial.print('d');
 else if (xVal==-5 & yVal<=5)
-    Serial.println('l'); 
+    Serial.print('l'); 
 else if (xVal>=5 & yVal<=5)
-    Serial.println('r');  
-delay(20);  
+    Serial.print('r');  
+delay(100);  
 //delay(20);
  //if (Serial.available() > 0) {
     // read the incoming byte:
