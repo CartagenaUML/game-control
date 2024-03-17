@@ -25,7 +25,7 @@ import serial
 # Note the serial port dev file name
 # need to change based on the particular host machine
 # TODO uncomment the following two lines to initialize serial port
-serialDevFile = '/dev/tty.usbmodem142301'
+serialDevFile = '/dev/tty.usbmodem144301'
 ser=serial.Serial(serialDevFile, 9600, timeout=0)
 
 delay = 0.1
@@ -128,6 +128,7 @@ while True:
     #     head.direction = "down"
     # elif ......
     #
+    #code added to read serial data from arduino
     line = ser.readline()
     if (line == b'W\r\n' or line == b'w\r\n'):
         go_up()
@@ -140,6 +141,8 @@ while True:
     elif (line == b'Q\r\n' or line == b'q\r\n'):
         food.color("gold")
         goldScore = 10
+    ser.flush()
+    ser.reset_input_buffer()
     # Check for a collision with the border
     if head.xcor()>290 or head.xcor()<-290 or head.ycor()>290 or head.ycor()<-290:
         time.sleep(1)
@@ -239,6 +242,7 @@ while True:
             # Reset the score
             score = 0
             goldScore = 0
+            food.color("red")
 
             # Reset the delay
             delay = 0.1
