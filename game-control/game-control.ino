@@ -24,6 +24,9 @@ const int ACCEL_YOUT_LOW_BYTE = 0x3E; // Register address for y acceleration low
 const int ACCEL_ZOUT_HIGH_BYTE = 0x3F; // Register address for z acceleration high byte
 const int ACCEL_ZOUT_LOW_BYTE = 0x40; // Register address for z acceleration low byte
 
+const int potX=A0;
+const int potY=A1;
+
 // global variables for MPU-6050
 float accX, accY, accZ;
 volatile bool dataInterrupt = false;
@@ -36,6 +39,10 @@ const int INTERRUPT_MPU = 2;
 // LED status
 int led_status = HIGH;
 int incomingByte = 0;
+
+// joystick values
+int xVal=0;//initially x value of joystick 0
+int yVal=0;//initially y value of joystick 0
 
 void setup() {
 // initialize serial communication at 9600 bits per second:
@@ -50,13 +57,24 @@ void setup() {
   led_status = LOW;
 
   digitalWrite(INTERRUPT_MPU, INPUT);
-  attachInterrupt(digitalPinToInterrupt(INTERRUPT_MPU), mpuDataReady, RISING);
+  //attachInterrupt(digitalPinToInterrupt(INTERRUPT_MPU), mpuDataReady, RISING);
   // initialize I2C communication
   Wire.begin();
   Wire.beginTransmission(MPU6050);
   Wire.write(PWR_MGMT_1); // Talk to power managemnt of MPU6050
   Wire.write(0x80); // do a device reset and all internal register go to default values
   Wire.endTransmission(true); // I2C Stop
+}
+
+void food_eat(){
+if (Serial.available() > 0) {// read from the Serial port:
+  incomingByte = Serial.read();   // read the incoming byte:
+  Serial.print(incomingByte);
+  digitalWrite(BUZZ,HIGH);
+  delay(100);
+  digitalWrite(BUZZ,LOW);
+  // Serial.print('food eaten');
+  }
 }
 
 void loop() {
@@ -74,7 +92,7 @@ void loop() {
   accY = (Wire.read() << 8| Wire.read()) / 16384.0;
   accZ = (Wire.read() << 8| Wire.read()) / 16384.0;
 
-  /* absolute value of acceleration
+ 
   if (accX < 0) {
     accX = accX * -1;
   }
@@ -83,12 +101,38 @@ void loop() {
   }
   if (accZ < 0) {
     accZ = accZ * -1;
-  }*/
+  }
+
   totalAcc = accX + accY + accZ;
   if (totalAcc >= 3) {
-    Serial.println("Q");
+    Serial.print("q");
   }
-  // read from the Serial port:
+
+  xVal=map(analogRead(potX) +8,0,1023,-5,+5);//mapping x axis valus from vx pin of joystick low to -5 and high to +5 for easier reading
+yVal=map(analogRead(potY)-8,0,1023,-5,+5);//mapping y axis valus from vy pin of joystick low to -5 and high to +5 for easier reading
+
+if (xVal==0 & yVal== 0){//if x axis value of joystick &  y axis value of joystick is 0
+   Serial.print('s');
+   // write s
+}
+if (xVal>= 0 & yVal== -5) {
+   Serial.print('u');
+   food_eat();
+}
+if (xVal==0 & yVal>=4){
+    Serial.print('d');
+    food_eat();
+}
+if (xVal==-5 & yVal<=5){
+    Serial.print('l'); 
+    food_eat();
+}
+if (xVal>=5 & yVal<=5){
+    Serial.print('r');
+    food_eat();
+}
+
+  /*// read from the Serial port:
   if (Serial.available() > 0) {
 
     // read the incoming byte:
@@ -106,11 +150,12 @@ void loop() {
     else if (incomingByte == 'U') {
       digitalWrite(BUZZ, LOW);
     }
-  }
+    }*/
+}
 
   // write to serial port
   // this can go after I2C read and after joystick read
-}
+
 
 void mpuDataReady() {
   dataInterrupt = true;

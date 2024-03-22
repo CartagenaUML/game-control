@@ -16,7 +16,7 @@ import serial
 # TODO uncomment the following two lines to initialize serial port
 #serialDevFile = '/dev/cu.usbmodem14201'
 #SerialObj=serial.Serial('COM3', 9600, timeout=0)
-ser=serial.Serial('com3',9600,timeout=1);
+ser=serial.Serial('com11',9600,timeout=1);
 
 delay = 0.1
 
@@ -24,6 +24,7 @@ delay = 0.1
 score = 0
 high_score = 0
 ppa = 10
+goldScore = 0
 
 # Set up the screen
 wn = turtle.Screen()
@@ -133,6 +134,10 @@ while True:
         head.direction = "right"
     elif control_information == "l":
         head.direction = "left"
+    elif control_information == "q":
+        food.color("gold")
+        goldScore = 10
+
 
     #print(head.direction)
     
@@ -151,6 +156,7 @@ while True:
 
         # Reset the score
         score = 0
+        goldScore = 0
 
         # Reset the delay
         delay = 0.1
@@ -168,7 +174,8 @@ while True:
         # Hint: refer to the example at Serial-RW/pyserial-test.py
         #line = ser.readline()
         #print(line)
-        ser.write(b'E')  #write E when food is eaten to arduino
+        ser.write(b'B')  #write E when food is eaten to arduino
+        food.color("red")
         # Move the food to a random spot
         x = random.randint(-290, 290)
         y = random.randint(-290, 290)
@@ -187,6 +194,8 @@ while True:
 
         # Increase the score
         score += 10
+        score = score + goldScore
+        goldScore = 0
 
         if score > high_score:
             high_score = score
@@ -214,6 +223,8 @@ while True:
             time.sleep(1)
             head.goto(0,0)
             head.direction = "stop"
+            food.color("red")
+            goldScore = 0
         
             # Hide the segments
             for segment in segments:
