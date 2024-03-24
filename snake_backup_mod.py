@@ -16,7 +16,7 @@ import serial
 # TODO uncomment the following two lines to initialize serial port
 #serialDevFile = '/dev/cu.usbmodem14201'
 #SerialObj=serial.Serial('COM3', 9600, timeout=0)
-ser=serial.Serial('com11',9600,timeout=1);
+ser=serial.Serial('COM7',9600,timeout=1);
 
 delay = 0.1
 
@@ -118,8 +118,8 @@ while True:
     # elif ......
     #
     ser.reset_input_buffer()
-    while ser.inWaiting()==0:
-        pass
+    #while ser.inWaiting()==0:
+    #    pass
         
     control_information = ser.read()
 
@@ -127,18 +127,19 @@ while True:
     #print(control_information)
     
     if control_information == "u":
-        head.direction = "up"
+        go_up()
     elif control_information == "d":
-        head.direction = "down"
+        go_down()
     elif control_information == "r":
-        head.direction = "right"
+        go_right()
     elif control_information == "l":
-        head.direction = "left"
+        go_left()
     elif control_information == "q":
         food.color("gold")
         goldScore = 10
 
-
+    ser.flush()
+    ser.reset_input_buffer()
     #print(head.direction)
     
     # Check for a collision with the border

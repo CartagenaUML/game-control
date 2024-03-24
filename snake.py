@@ -25,7 +25,7 @@ import serial
 # Note the serial port dev file name
 # need to change based on the particular host machine
 # TODO uncomment the following two lines to initialize serial port
-serialDevFile = 'COM11'
+serialDevFile = 'COM7'
 ser=serial.Serial(serialDevFile, 9600, timeout=0)
 
 delay = 0.1
@@ -138,7 +138,10 @@ while True:
         go_left()
     elif (line == b'D\r\n' or line == b'd\r\n' or line == b'r\r\n'):
         go_right()
-    elif (line == b'Q\r\n' or line == b'q\r\n'):
+    #ser.flush()
+    #ser.reset_input_buffer()
+    #line = ser.readline()
+    if (line == b'Q\r\n' or line == b'q\r\n'):
         food.color("gold")
         goldScore = 10
     ser.flush()

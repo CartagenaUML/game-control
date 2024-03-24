@@ -12,7 +12,7 @@
 // https://howtomechatronics.com/tutorials/arduino/arduino-and-mpu6050-accelerometer-and-gyroscope-tutorial/
 // Author is Dejan
 
-#include <Wire.h>
+#include "Wire.h"
 
 // I2C addresses and register addresses for MPU6050
 const int MPU6050 = 0x68; // I2C address, A0 pulled LOW
@@ -23,12 +23,15 @@ const int ACCEL_YOUT_HIGH_BYTE = 0x3D; // Register address for y acceleration hi
 const int ACCEL_YOUT_LOW_BYTE = 0x3E; // Register address for y acceleration low byte
 const int ACCEL_ZOUT_HIGH_BYTE = 0x3F; // Register address for z acceleration high byte
 const int ACCEL_ZOUT_LOW_BYTE = 0x40; // Register address for z acceleration low byte
+const int GYRO_XOUT_HIGH_BYTE = 0x43; // Register address for x direction gyroscope high byte
 
+// joystick potentioemters
 const int potX=A0;
 const int potY=A1;
 
 // global variables for MPU-6050
 float accX, accY, accZ;
+float gyroX, gyroY, gyroZ;
 volatile bool dataInterrupt = false;
 int totalAcc;
 
@@ -92,7 +95,26 @@ void loop() {
   accY = (Wire.read() << 8| Wire.read()) / 16384.0;
   accZ = (Wire.read() << 8| Wire.read()) / 16384.0;
 
- 
+  Wire.beginTransmission(MPU6050);
+  Wire.write(GYRO_XOUT_HIGH_BYTE);
+  // restart I2C, do not stop
+  Wire.endTransmission(false);
+  // read from register 0x43 to register 0x48 for x, y and z gyroscope
+  // default range +-131 LSB/degree/s
+  Wire.requestFrom(MPU6050, 6, true);
+  gyroX = (Wire.read() << 8| Wire.read()) / 131.0;
+  gyroY = (Wire.read() << 8| Wire.read()) / 131.0;
+  gyroZ = (Wire.read() << 8| Wire.read()) / 131.0;
+  /*
+  Serial.print("Axis X = ");
+  Serial.print(gyroX);
+  Serial.print("  ");
+  Serial.print("Axis Y = ");
+  Serial.print(gyroY);
+  Serial.print("  ");
+  Serial.print("Axis Z  = ");
+  Serial.println(gyroZ);
+  */
   if (accX < 0) {
     accX = accX * -1;
   }
@@ -104,33 +126,29 @@ void loop() {
   }
 
   totalAcc = accX + accY + accZ;
-  if (totalAcc >= 3) {
-    Serial.print("q");
+  if (totalAcc >= 2) {
+    Serial.println("q");
   }
 
   xVal=map(analogRead(potX) +8,0,1023,-5,+5);//mapping x axis valus from vx pin of joystick low to -5 and high to +5 for easier reading
-yVal=map(analogRead(potY)-8,0,1023,-5,+5);//mapping y axis valus from vy pin of joystick low to -5 and high to +5 for easier reading
+  yVal=map(analogRead(potY)-8,0,1023,-5,+5);//mapping y axis valus from vy pin of joystick low to -5 and high to +5 for easier reading
 
-if (xVal==0 & yVal== 0){//if x axis value of joystick &  y axis value of joystick is 0
-   Serial.print('s');
-   // write s
-}
-if (xVal>= 0 & yVal== -5) {
-   Serial.print('u');
-   food_eat();
-}
-if (xVal==0 & yVal>=4){
-    Serial.print('d');
+  if ((xVal>= 0 & yVal== -5) | gyroY < -100) {
+    Serial.println('u');
     food_eat();
-}
-if (xVal==-5 & yVal<=5){
-    Serial.print('l'); 
-    food_eat();
-}
-if (xVal>=5 & yVal<=5){
-    Serial.print('r');
-    food_eat();
-}
+  }
+  if ((xVal==0 & yVal>=4) | gyroY > 100){
+      Serial.println('d');
+      food_eat();
+  }
+  if ((xVal==-5 & yVal<=5) | gyroX > 100){
+      Serial.println('l'); 
+      food_eat();
+  }
+  if ((xVal>=5 & yVal<=5) | gyroX < -100){
+      Serial.println('r');
+      food_eat();
+  }
 
   /*// read from the Serial port:
   if (Serial.available() > 0) {
