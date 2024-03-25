@@ -25,7 +25,7 @@ import serial
 # Note the serial port dev file name
 # need to change based on the particular host machine
 # TODO uncomment the following two lines to initialize serial port
-serialDevFile = '/dev/tty.usbmodem144301'
+serialDevFile = 'COM7'
 ser=serial.Serial(serialDevFile, 9600, timeout=0)
 
 delay = 0.1
@@ -130,15 +130,18 @@ while True:
     #
     #code added to read serial data from arduino
     line = ser.readline()
-    if (line == b'W\r\n' or line == b'w\r\n'):
+    if (line == b'W\r\n' or line == b'w\r\n' or line == b'u\r\n'):
         go_up()
-    elif (line == b'S\r\n' or line == b's\r\n'):
+    elif (line == b'S\r\n' or line == b's\r\n' or line == b'd\r\n'):
         go_down()
-    elif (line == b'A\r\n' or line == b'a\r\n'):
+    elif (line == b'A\r\n' or line == b'a\r\n' or line == b'l\r\n'):
         go_left()
-    elif (line == b'D\r\n' or line == b'd\r\n'):
+    elif (line == b'D\r\n' or line == b'd\r\n' or line == b'r\r\n'):
         go_right()
-    elif (line == b'Q\r\n' or line == b'q\r\n'):
+    #ser.flush()
+    #ser.reset_input_buffer()
+    #line = ser.readline()
+    if (line == b'Q\r\n' or line == b'q\r\n'):
         food.color("gold")
         goldScore = 10
     ser.flush()
@@ -193,7 +196,7 @@ while True:
         segments.append(new_segment)
 
         # 'U' for Unbuzz
-        ser.write(b'U')
+        #ser.write(b'U')
 
         # Shorten the delay
         delay -= 0.001
@@ -203,7 +206,7 @@ while True:
         score = score + goldScore
         goldScore = 0
         # 'U' for Unbuzz
-        ser.write(b'U') 
+        #ser.write(b'U') 
 
         if score > high_score:
             high_score = score
